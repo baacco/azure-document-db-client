@@ -1,0 +1,25 @@
+{
+  "name": "azure-document-db-client",
+  "version": "1.0.0",
+  "description": "Azure DocumentDB wrapper for node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baacco/azure-document-db-client.git"
+  },
+  "keywords": [
+    "baacco",
+    "document",
+    "db",
+    "client"
+  ],
+  "author": "Baacco Team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/baacco/azure-document-db-client/issues"
+  },
+  "homepage": "https://github.com/baacco/azure-document-db-client#readme"
+}
