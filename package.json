@@ -1,6 +1,6 @@
 {
   "name": "azure-document-db-client",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Azure DocumentDB wrapper for node.js",
   "main": "index.js",
   "scripts": {

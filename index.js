@@ -1,27 +1,34 @@
 'use strict';
 
 var DocumentDatabase = require('./lib/documentDatabase');
+var DocumentClient = require('documentdb').DocumentClient;
 var db;
 
 module.exports = DocumentRepository;
 
-function DocumentRepository(documentDBClient, databaseName, collectionName) {
-    db = new DocumentDatabase(documentDBClient);
-    this.client = documentDBClient;
+function DocumentRepository(dbConfig, databaseName, collectionName) {
+    var docDbClient = new DocumentClient(dbConfig.documentDbUrl, {
+        masterKey: dbConfig.documentDbKey
+    });
+
+    db = new DocumentDatabase(docDbClient);
+    this.client = docDbClient;
     this.databaseName = databaseName;
     this.collectionName = collectionName;
+
+    this.database = null;
     this.collection = null;
 }
 
 DocumentRepository.prototype = {
-    init: function(callback) {
+    init: function (callback) {
         var self = this;
 
-        db.getOrCreateDatabase(self.databaseName, function(err, database) {
+        db.getOrCreateDatabase(self.databaseName, function (err, database) {
             if (err) {
                 callback(err);
             } else {
-                db.getOrCreateCollection(database._self, self.collectionName, function(err, coll) {
+                db.getOrCreateCollection(database._self, self.collectionName, function (err, coll) {
                     if (err) {
                         callback(err);
 
@@ -43,7 +50,7 @@ DocumentRepository.prototype = {
             }]
         };
 
-        this.client.queryDocuments(self.collection._self, query).toArray(function(err, results) {
+        this.client.queryDocuments(self.collection._self, query).toArray(function (err, results) {
             if (err) {
                 callback(err);
             } else {
@@ -61,7 +68,7 @@ DocumentRepository.prototype = {
             }]
         };
 
-        this.client.queryDocuments(self.collection._self, query).toArray(function(err, results) {
+        this.client.queryDocuments(self.collection._self, query).toArray(function (err, results) {
             if (err) {
                 callback(err);
             } else {
@@ -75,8 +82,8 @@ DocumentRepository.prototype = {
             query: 'SELECT * FROM root'
         };
 
-        this.client.queryDocuments(self.collection._self, query).toArray(function(err, results) {
-            if(err) {
+        this.client.queryDocuments(self.collection._self, query).toArray(function (err, results) {
+            if (err) {
                 callback(err);
             } else {
                 callback(null, results);
@@ -87,7 +94,7 @@ DocumentRepository.prototype = {
     add: function add(item, callback) {
         var self = this;
 
-        this.client.createDocument(self.collection._self, item, function(err, doc) {
+        this.client.createDocument(self.collection._self, item, function (err, doc) {
             callback(err, doc);
         });
     },
@@ -95,12 +102,12 @@ DocumentRepository.prototype = {
     update: function update(item, callback) {
         var self = this;
 
-        self.getById(item.id, function(err, doc) {
-            if(err) {
+        self.getById(item.id, function (err, doc) {
+            if (err) {
                 callback(err);
             } else {
-                self.client.replaceDocument(doc._self, item, function(err, replacedDoc) {
-                    if(err) {
+                self.client.replaceDocument(doc._self, item, function (err, replacedDoc) {
+                    if (err) {
                         callback(err);
                     } else {
                         callback(null, replacedDoc);
@@ -113,13 +120,14 @@ DocumentRepository.prototype = {
     addOrUpdate: function addOrUpdate(item, callback) {
         var self = this;
 
-        self.getById(item.id, function(err, doc) {
-            if(err) {
+        self.getById(item.id, function (err, doc) {
+            if (err) {
                 callback(err);
             } else {
-                if(!doc) {
+                if (!doc) {
                     self.client.createDocument(self.collection._self, item, callback);
                 } else {
+                    // TODO: check for concurrency problems
                     self.client.replaceDocument(doc._self, item, callback);
                 }
             }
